@@ -104,6 +104,7 @@ Create a dedicated IAM role so EC2 instances can access S3 without embedding cre
       "Action": [
         "s3:GetObject",
         "s3:PutObject",
+        "s3:DeleteObject",
         "s3:ListBucket"
       ],
       "Resource": [

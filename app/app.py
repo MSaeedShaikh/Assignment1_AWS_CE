@@ -15,6 +15,35 @@ S3_BUCKET = os.getenv('S3_BUCKET', 'unievent-media-bucket')
 EVENTS_CACHE = []
 
 app = Flask(__name__)
+s3_client = boto3.client('s3', region_name='eu-north-1')
+
+
+def upload_image_to_s3(image_url, event_id):
+    key = f"events/{event_id}.jpg"
+    try:
+        s3_client.head_object(Bucket=S3_BUCKET, Key=key)
+    except s3_client.exceptions.ClientError:
+        try:
+            img_response = requests.get(image_url, timeout=10)
+            img_response.raise_for_status()
+            s3_client.put_object(
+                Bucket=S3_BUCKET,
+                Key=key,
+                Body=img_response.content,
+                ContentType='image/jpeg',
+            )
+        except Exception as e:
+            print(f"[{datetime.datetime.now()}] Image upload failed for {event_id}: {e}")
+            return None
+    try:
+        return s3_client.generate_presigned_url(
+            'get_object',
+            Params={'Bucket': S3_BUCKET, 'Key': key},
+            ExpiresIn=604800,
+        )
+    except Exception as e:
+        print(f"[{datetime.datetime.now()}] Presign failed for {event_id}: {e}")
+        return None
 
 
 def fetch_events():
@@ -36,7 +65,9 @@ def fetch_events():
         events = []
         for event in events_raw:
             images = event.get('images', [])
-            image = next((img['url'] for img in images if img.get('ratio') == '16_9'), None)
+            raw_image = next((img['url'] for img in images if img.get('ratio') == '16_9'), None)
+            event_id = event.get('id', '')
+            image = upload_image_to_s3(raw_image, event_id) if raw_image and event_id else None
             events.append({
                 'name': event.get('name'),
                 'date': event.get('dates', {}).get('start', {}).get('localDate'),
@@ -50,6 +81,17 @@ def fetch_events():
 
         EVENTS_CACHE = events
         print(f"[{datetime.datetime.now()}] Fetched {len(EVENTS_CACHE)} events successfully.")
+
+        current_keys = {f"events/{event.get('id')}.jpg" for event in events_raw if event.get('id')}
+        try:
+            paginator = s3_client.get_paginator('list_objects_v2')
+            for page in paginator.paginate(Bucket=S3_BUCKET, Prefix='events/'):
+                for obj in page.get('Contents', []):
+                    if obj['Key'] not in current_keys:
+                        s3_client.delete_object(Bucket=S3_BUCKET, Key=obj['Key'])
+                        print(f"[{datetime.datetime.now()}] Deleted stale image: {obj['Key']}")
+        except Exception as e:
+            print(f"[{datetime.datetime.now()}] S3 cleanup error: {e}")
     except Exception as e:
         print(f"[{datetime.datetime.now()}] Error fetching events: {e}")
 
