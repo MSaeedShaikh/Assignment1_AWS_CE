@@ -67,7 +67,7 @@ def fetch_events():
             images = event.get('images', [])
             raw_image = next((img['url'] for img in images if img.get('ratio') == '16_9'), None)
             event_id = event.get('id', '')
-            image = upload_image_to_s3(raw_image, event_id) if raw_image and event_id else None
+            image = (upload_image_to_s3(raw_image, event_id) if raw_image and event_id else None) or raw_image
             events.append({
                 'name': event.get('name'),
                 'date': event.get('dates', {}).get('start', {}).get('localDate'),
