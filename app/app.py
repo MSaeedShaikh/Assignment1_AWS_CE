@@ -99,6 +99,7 @@ def fetch_events():
 scheduler = BackgroundScheduler()
 scheduler.add_job(fetch_events, trigger='interval', minutes=15)
 scheduler.start()
+fetch_events()
 
 
 @app.route('/')
