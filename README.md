@@ -117,8 +117,8 @@ Create a dedicated IAM role so EC2 instances can access S3 without embedding cre
         "s3:ListBucket"
       ],
       "Resource": [
-        "arn:aws:s3:::unievent-media-bucket",
-        "arn:aws:s3:::unievent-media-bucket/*"
+        "arn:aws:s3:::unievent-media-bucket-706257133013-eu-north-1-an",
+        "arn:aws:s3:::unievent-media-bucket-706257133013-eu-north-1-an/*"
       ]
     }
   ]
@@ -196,7 +196,7 @@ Two security groups are chained so that EC2 instances only accept traffic origin
 An S3 bucket caches Ticketmaster event images. On each 15-minute refresh, `fetch_events()` downloads any new images from the Ticketmaster CDN, uploads them to S3 under the `events/` prefix, and deletes images for events no longer in the feed. EC2 instances access the bucket via the IAM role from Step 1 — no public bucket policy is needed.
 
 1. Open **S3 → Create bucket**.
-2. Name it `unievent-media-bucket`, region `eu-north-1`.
+2. Name it `unievent-media-bucket-706257133013-eu-north-1-an`, region `eu-north-1`.
 3. Leave **Block all public access** enabled.
 
 ![S3 Bucket](docs/screenshots/10-s3-bucket.png)

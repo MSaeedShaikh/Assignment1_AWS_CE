@@ -22,7 +22,7 @@ A role is used in place of IAM user access keys for the following reasons:
 
 ## Policy: UniEvent-S3-Policy
 
-The inline policy attached to `UniEvent-EC2-Role` grants access to the `unievent-media-bucket` S3 bucket only.
+The inline policy attached to `UniEvent-EC2-Role` grants access to the `unievent-media-bucket-706257133013-eu-north-1-an` S3 bucket only.
 
 ```json
 {
@@ -38,8 +38,8 @@ The inline policy attached to `UniEvent-EC2-Role` grants access to the `unievent
         "s3:ListBucket"
       ],
       "Resource": [
-        "arn:aws:s3:::unievent-media-bucket",
-        "arn:aws:s3:::unievent-media-bucket/*"
+        "arn:aws:s3:::unievent-media-bucket-706257133013-eu-north-1-an",
+        "arn:aws:s3:::unievent-media-bucket-706257133013-eu-north-1-an/*"
       ]
     }
   ]
@@ -52,13 +52,13 @@ The inline policy attached to `UniEvent-EC2-Role` grants access to the `unievent
 | `s3:PutObject` | Upload individual objects to the bucket | Store new media assets or cached data if the application writes to S3 |
 | `s3:ListBucket` | List the keys (filenames) within the bucket | Required by the SDK before performing `GetObject` on a path; also needed for directory-style listings |
 
-**Resource ARN scoping** uses two entries deliberately. `arn:aws:s3:::unievent-media-bucket` (without a trailing path) is required for bucket-level actions such as `s3:ListBucket`. `arn:aws:s3:::unievent-media-bucket/*` (with the `/*` wildcard) is required for object-level actions such as `s3:GetObject` and `s3:PutObject`. Using both ensures the policy covers exactly what is needed without broadening to `arn:aws:s3:::*`, which would grant the same permissions across every bucket in the account.
+**Resource ARN scoping** uses two entries deliberately. `arn:aws:s3:::unievent-media-bucket-706257133013-eu-north-1-an` (without a trailing path) is required for bucket-level actions such as `s3:ListBucket`. `arn:aws:s3:::unievent-media-bucket-706257133013-eu-north-1-an/*` (with the `/*` wildcard) is required for object-level actions such as `s3:GetObject` and `s3:PutObject`. Using both ensures the policy covers exactly what is needed without broadening to `arn:aws:s3:::*`, which would grant the same permissions across every bucket in the account.
 
 ---
 
 ## Risks Prevented
 
 - **Credential theft via source code** -- because no access keys exist, an attacker who reads `app.py`, `userdata.sh`, or any environment file finds no usable AWS credentials to exfiltrate.
-- **Lateral movement to other buckets** -- the `Resource` ARN is scoped to `unievent-media-bucket` only; even with full control of the EC2 instance an attacker cannot read, write, or delete objects in any other S3 bucket in the account.
+- **Lateral movement to other buckets** -- the `Resource` ARN is scoped to `unievent-media-bucket-706257133013-eu-north-1-an` only; even with full control of the EC2 instance an attacker cannot read, write, or delete objects in any other S3 bucket in the account.
 - **Privilege escalation via S3** -- omitting IAM actions (`iam:*`), EC2 actions, and other service permissions means a compromised instance cannot be used to create new users, attach policies, or provision additional infrastructure.
 - **Persistent access after instance termination** -- temporary credentials tied to the instance profile are invalidated when the instance is stopped or terminated; there are no long-lived keys that remain valid after the compute resource is gone.
