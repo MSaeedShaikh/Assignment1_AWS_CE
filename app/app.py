@@ -21,32 +21,40 @@ s3_client = boto3.client('s3', region_name='eu-north-1')
 
 def upload_image_to_s3(image_url, event_id):
     key = f"events/{event_id}.jpg"
+    ts = datetime.datetime.now()
     try:
         s3_client.head_object(Bucket=S3_BUCKET, Key=key)
+        print(f"[{ts}] S3 HIT: {key}")
     except ClientError as e:
-        if e.response['Error']['Code'] not in ('404', 'NoSuchKey'):
-            print(f"[{datetime.datetime.now()}] S3 head_object error for {event_id}: {e}")
+        code = e.response['Error']['Code']
+        if code not in ('404', 'NoSuchKey'):
+            print(f"[{ts}] S3 head_object unexpected error ({code}) for {event_id}: {e}")
             return None
+        print(f"[{ts}] S3 MISS: {key} — downloading and uploading...")
         try:
             img_response = requests.get(image_url, timeout=10)
             img_response.raise_for_status()
+            print(f"[{ts}] Downloaded {len(img_response.content)} bytes from Ticketmaster")
             s3_client.put_object(
                 Bucket=S3_BUCKET,
                 Key=key,
                 Body=img_response.content,
                 ContentType='image/jpeg',
             )
+            print(f"[{ts}] S3 PUT OK: {key}")
         except Exception as e:
-            print(f"[{datetime.datetime.now()}] Image upload failed for {event_id}: {e}")
+            print(f"[{ts}] S3 upload FAILED for {event_id}: {e}")
             return None
     try:
-        return s3_client.generate_presigned_url(
+        url = s3_client.generate_presigned_url(
             'get_object',
             Params={'Bucket': S3_BUCKET, 'Key': key},
             ExpiresIn=604800,
         )
+        print(f"[{ts}] Presigned URL generated for {key}")
+        return url
     except Exception as e:
-        print(f"[{datetime.datetime.now()}] Presign failed for {event_id}: {e}")
+        print(f"[{ts}] Presign FAILED for {event_id}: {e}")
         return None
 
 
@@ -71,7 +79,7 @@ def fetch_events():
             images = event.get('images', [])
             raw_image = next((img['url'] for img in images if img.get('ratio') == '16_9'), None)
             event_id = event.get('id', '')
-            image = (upload_image_to_s3(raw_image, event_id) if raw_image and event_id else None) or raw_image
+            image = upload_image_to_s3(raw_image, event_id) if raw_image and event_id else None
             events.append({
                 'name': event.get('name'),
                 'date': event.get('dates', {}).get('start', {}).get('localDate'),
