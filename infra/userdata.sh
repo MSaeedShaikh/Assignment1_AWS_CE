@@ -12,6 +12,7 @@ pip3 install flask boto3 requests apscheduler gunicorn python-dotenv
 
 # ── Clone the repo ────────────────────────────────────────────────────────────
 git clone https://github.com/MSaeedShaikh/Assignment1_AWS_CE.git /home/ec2-user/unievent
+chown -R ec2-user:ec2-user /home/ec2-user/unievent
 
 # ── Write .env with API key ───────────────────────────────────────────────────
 cat > /home/ec2-user/unievent/.env << 'EOF'

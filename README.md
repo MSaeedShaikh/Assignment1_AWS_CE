@@ -161,8 +161,8 @@ Create an isolated Virtual Private Cloud with public subnets (for the ALB) and p
 ![VPC Created](docs/screenshots/03-vpc-created.png)
 ![Subnets](docs/screenshots/04-subnets.png)
 ![Internet Gateway](docs/screenshots/05-igw-attached.png)
-![Route Table](docs/screenshots/06-route-table.png)
-![Auto-assign IP](docs/screenshots/07-auto-assign-ip.png)
+![NAT Gateway](docs/screenshots/06-nat-gateway.png)
+![Route Table](docs/screenshots/07-route-tables.png)
 
 ---
 
@@ -174,8 +174,8 @@ Two security groups are chained so that EC2 instances only accept traffic origin
 2. Create `UniEvent-ALB-SG` in `UniEvent-VPC`. Add inbound rule: **HTTP (80)** from `0.0.0.0/0`.
 3. Create `UniEvent-EC2-SG` in `UniEvent-VPC`. Add inbound rule: **Custom TCP port 5000**, source = `UniEvent-ALB-SG` (select the SG ID, not a CIDR).
 
-![ALB Security Group](docs/screenshots/08-alb-sg.png)
-![EC2 Security Group](docs/screenshots/09-ec2-sg.png)
+![ALB Security Group](docs/screenshots/08-sg-alb.png)
+![EC2 Security Group](docs/screenshots/09-sg-ec2.png)
 
 ---
 
@@ -204,8 +204,8 @@ Two EC2 instances are launched in separate private subnets (one per AZ) so the A
 6. Name the instance `UniEvent-EC2-AZ1` and launch.
 7. Repeat steps 1-6 using subnet `UniEvent-Private-2`, naming the instance `UniEvent-EC2-AZ2`.
 
-![EC2 Instance 1](docs/screenshots/11-ec2-az1.png)
-![EC2 Instance 2](docs/screenshots/12-ec2-az2.png)
+![EC2 Instance 1](docs/screenshots/11-ec2-1-running.png)
+![EC2 Instance 2](docs/screenshots/12-ec2-2-running.png)
 
 ---
 
@@ -224,8 +224,8 @@ The ALB acts as the single entry point for all traffic, balancing requests betwe
 6. Set the listener (port 80) to forward to `UniEvent-TG`.
 7. Click **Create load balancer**.
 
-![ALB Created](docs/screenshots/13-alb-created.png)
-![Target Group Healthy](docs/screenshots/14-target-group-healthy.png)
+![ALB Created](docs/screenshots/14-alb-active.png)
+![Target Group Healthy](docs/screenshots/13-target-group-healthy.png)
 
 ---
 
@@ -236,7 +236,7 @@ The application calls the Ticketmaster Discovery API to fetch live event listing
 1. Register at [developer.ticketmaster.com](https://developer.ticketmaster.com) and create a new app.
 2. Copy the **Consumer Key** from the app dashboard.
 3. In `infra/userdata.sh`, find the line `TICKETMASTER_API_KEY=REPLACE_WITH_YOUR_KEY` inside the `.env` heredoc and paste your key after the `=`.
-4. Alternatively, SSH into each EC2 instance and update `/home/ec2-user/unievent/.env` directly, then restart gunicorn.
+4. Alternatively, SSM into each EC2 instance and update `/home/ec2-user/unievent/.env` directly, then restart gunicorn.
 
 ---
 
