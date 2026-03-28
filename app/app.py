@@ -25,6 +25,19 @@ try:
 except Exception as e:
     print(f"[STARTUP] Could not get AWS identity: {e}")
 
+try:
+    s3_client.list_objects_v2(Bucket=S3_BUCKET, MaxKeys=1)
+    print(f"[STARTUP] S3 OK — bucket accessible: {S3_BUCKET}")
+except Exception as e:
+    print(f"[STARTUP] S3 FAILED for bucket '{S3_BUCKET}': {e}")
+
+try:
+    s3_client.put_object(Bucket=S3_BUCKET, Key='_test.txt', Body=b'test')
+    print(f"[STARTUP] S3 put_object OK")
+    s3_client.delete_object(Bucket=S3_BUCKET, Key='_test.txt')
+except Exception as e:
+    print(f"[STARTUP] S3 put_object FAILED: {e}")
+
 
 def upload_image_to_s3(image_url, event_id):
     key = f"events/{event_id}.jpg"
