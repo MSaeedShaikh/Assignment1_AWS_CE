@@ -17,8 +17,6 @@ EVENTS_CACHE = []
 app = Flask(__name__)
 s3_client = boto3.client('s3', region_name='eu-north-1')
 
-
-
 def upload_image_to_s3(image_url, event_id):
     key = f"events/{event_id}.jpg"
     try:
