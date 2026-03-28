@@ -1,4 +1,4 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 import boto3
 import requests
 from apscheduler.schedulers.background import BackgroundScheduler
@@ -45,6 +45,7 @@ def fetch_events():
                 'image': image,
                 'url': event.get('url'),
                 'description': event.get('info', ''),
+                'classification': event.get('classifications', [{}])[0].get('segment', {}).get('name', ''),
             })
 
         EVENTS_CACHE = events
@@ -60,7 +61,27 @@ scheduler.start()
 
 @app.route('/')
 def index():
-    return render_template('index.html', events=EVENTS_CACHE)
+    category = request.args.get('category', '').strip()
+    if category and category.lower() != 'all':
+        filtered = [
+            e for e in EVENTS_CACHE
+            if category.lower() in (e.get('name') or '').lower()
+            or category.lower() in (e.get('classification') or '').lower()
+        ]
+    else:
+        filtered = EVENTS_CACHE
+        category = 'All'
+    return render_template('index.html', events=filtered, active_category=category)
+
+
+@app.route('/about')
+def about():
+    return render_template('about.html')
+
+
+@app.route('/contact')
+def contact():
+    return render_template('contact.html')
 
 
 @app.route('/api/events')

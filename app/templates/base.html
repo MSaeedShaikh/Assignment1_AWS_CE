@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>{% block title %}UniEvent{% endblock %} — GIKI</title>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: #F5F6FA;
+      color: #222;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+
+    /* ── HEADER ── */
+    header {
+      background: #003366;
+      padding: 0 2rem 0 0;
+      display: flex;
+      align-items: stretch;
+      justify-content: space-between;
+      flex-shrink: 0;
+      min-height: 72px;
+    }
+
+    .logo-lockup {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      text-decoration: none;
+      padding: 0 1.5rem 0 0;
+    }
+    .logo-lockup img {
+      width: auto;
+      height: 100%;
+      min-height: 72px;
+      object-fit: contain;
+      background: #fff;
+      padding: 6px;
+      display: block;
+      flex-shrink: 0;
+      border-radius: 0;
+    }
+    .logo-text {
+      display: flex;
+      flex-direction: column;
+    }
+    .site-name {
+      color: #C8A951;
+      font-size: 1.6rem;
+      font-weight: bold;
+      line-height: 1.1;
+    }
+    .site-sub {
+      color: #ffffff;
+      font-size: 0.8rem;
+      margin-top: 2px;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+      gap: 0.25rem;
+    }
+    nav a {
+      color: #ffffff;
+      text-decoration: none;
+      font-size: 0.9rem;
+      padding: 0.5rem 1rem;
+      border-bottom: 2px solid transparent;
+      transition: color 0.15s, border-color 0.15s;
+      white-space: nowrap;
+    }
+    nav a:hover {
+      color: #C8A951;
+    }
+    nav a.active {
+      color: #C8A951;
+      border-bottom-color: #C8A951;
+    }
+
+    /* ── SUBHEADER ── */
+    .subheader {
+      background: #e4e6ed;
+      padding: 0.55rem 2rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      font-size: 0.8rem;
+      color: #555;
+      gap: 1rem;
+      flex-shrink: 0;
+    }
+
+    /* ── MAIN ── */
+    main {
+      flex: 1;
+    }
+
+    /* ── FOOTER ── */
+    footer {
+      background: #003366;
+      color: #C8A951;
+      text-align: center;
+      padding: 1rem 2rem;
+      font-size: 0.85rem;
+      line-height: 1.8;
+      flex-shrink: 0;
+    }
+
+    /* ── RESPONSIVE ── */
+    @media (max-width: 768px) {
+      header {
+        height: auto;
+        padding: 0.75rem 1rem;
+        flex-wrap: wrap;
+        gap: 0.75rem;
+      }
+      nav {
+        gap: 0;
+      }
+      nav a {
+        padding: 0.4rem 0.6rem;
+        font-size: 0.85rem;
+      }
+      .site-name {
+        font-size: 1.3rem;
+      }
+      .subheader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 0.25rem;
+        padding: 0.5rem 1rem;
+      }
+    }
+  </style>
+  {% block extra_style %}{% endblock %}
+</head>
+<body>
+
+  <header>
+    <a class="logo-lockup" href="/">
+      <img src="{{ url_for('static', filename='giki-logo-1.png') }}" alt="GIKI Logo">
+      <div class="logo-text">
+        <span class="site-name">UniEvent</span>
+        <span class="site-sub">GIKI University Events</span>
+      </div>
+    </a>
+    <nav>
+      <a href="/" class="{{ 'active' if request.endpoint == 'index' else '' }}">Home</a>
+      <a href="/about" class="{{ 'active' if request.endpoint == 'about' else '' }}">About</a>
+      <a href="/contact" class="{{ 'active' if request.endpoint == 'contact' else '' }}">Contact</a>
+    </nav>
+  </header>
+
+  {% block subheader %}{% endblock %}
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer>
+    <div>GIKI UniEvent &mdash; University Events Portal</div>
+    <div>CE408 Cloud Computing - 202241</div>
+  </footer>
+
+</body>
+</html>

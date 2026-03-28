@@ -1,0 +1,326 @@
+{% extends 'base.html' %}
+
+{% block title %}About{% endblock %}
+
+{% block extra_style %}
+<style>
+  /* ── HERO ── */
+  .hero {
+    background: #003366;
+    color: #fff;
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+  .hero h1 {
+    color: #C8A951;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  .hero p {
+    font-size: 1rem;
+    color: #ffffff;
+    opacity: 0.9;
+  }
+
+  /* ── SECTIONS ── */
+  .section {
+    padding: 2.5rem 2rem;
+    max-width: 1100px;
+    margin: 0 auto;
+    width: 100%;
+  }
+  .section-heading {
+    font-size: 1.35rem;
+    font-weight: bold;
+    color: #003366;
+    margin-bottom: 0.35rem;
+  }
+  .section-heading-accent {
+    display: block;
+    width: 48px;
+    height: 3px;
+    background: #C8A951;
+    border-radius: 2px;
+    margin-bottom: 1.5rem;
+  }
+
+  /* ── WHAT IS UNIEVENT — 2-col ── */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+  .prose p {
+    line-height: 1.7;
+    color: #444;
+    font-size: 0.95rem;
+  }
+
+  .stats-card {
+    background: #fff;
+    border-top: 3px solid #C8A951;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    padding: 1.25rem 1.5rem;
+  }
+  .stats-card h3 {
+    color: #003366;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 1rem;
+  }
+  .stats-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.65rem;
+  }
+  .stats-list li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    padding-bottom: 0.65rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .stats-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .stats-list .label {
+    color: #666;
+  }
+  .stats-list .value {
+    color: #003366;
+    font-weight: bold;
+  }
+
+  /* ── ARCHITECTURE TABLE ── */
+  .arch-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9rem;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  }
+  .arch-table thead tr {
+    background: #003366;
+    color: #C8A951;
+  }
+  .arch-table th {
+    padding: 0.85rem 1rem;
+    text-align: left;
+    font-weight: bold;
+  }
+  .arch-table tbody tr:nth-child(odd) {
+    background: #ffffff;
+  }
+  .arch-table tbody tr:nth-child(even) {
+    background: #f0f4ff;
+  }
+  .arch-table td {
+    padding: 0.75rem 1rem;
+    color: #333;
+  }
+
+  /* ── TECH STACK CARDS ── */
+  .tech-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1.5rem;
+  }
+  .tech-card {
+    background: #fff;
+    border-top: 3px solid #C8A951;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    padding: 1.25rem 1.5rem;
+  }
+  .tech-card h3 {
+    color: #003366;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.85rem;
+  }
+  .tech-card ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.45rem;
+  }
+  .tech-card ul li {
+    font-size: 0.875rem;
+    color: #444;
+    padding-left: 1rem;
+    position: relative;
+  }
+  .tech-card ul li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: #C8A951;
+  }
+
+  @media (max-width: 768px) {
+    .two-col { grid-template-columns: 1fr; }
+    .tech-grid { grid-template-columns: 1fr; }
+    .section { padding: 2rem 1rem; }
+    .hero { padding: 2rem 1rem; }
+    .hero h1 { font-size: 1.5rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+  <div class="hero">
+    <h1>About UniEvent</h1>
+    <p>A cloud-native university events platform built on AWS</p>
+  </div>
+
+  <!-- WHAT IS UNIEVENT -->
+  <div class="section">
+    <div class="section-heading">What is UniEvent?</div>
+    <span class="section-heading-accent"></span>
+    <div class="two-col">
+      <div class="prose">
+        <p>
+          UniEvent is a university events portal developed as part of the CE308/408 Cloud Computing
+          course at Ghulam Ishaq Khan Institute (GIKI). It connects students and staff with live
+          event listings sourced from the Ticketmaster Discovery API, covering music, sports, and
+          arts events across multiple regions.
+        </p>
+        <br>
+        <p>
+          The application is built with Flask and served by Gunicorn on Amazon EC2. An APScheduler
+          background job fetches the latest 20 events from the Ticketmaster API every 15 minutes
+          and stores them in memory, ensuring the page always reflects up-to-date listings without
+          requiring a database. All infrastructure runs on AWS in the eu-north-1 (Stockholm) region,
+          with multi-AZ deployment for high availability.
+        </p>
+      </div>
+      <div class="stats-card">
+        <h3>Platform at a Glance</h3>
+        <ul class="stats-list">
+          <li>
+            <span class="label">Events per refresh</span>
+            <span class="value">20</span>
+          </li>
+          <li>
+            <span class="label">Refresh interval</span>
+            <span class="value">15 minutes</span>
+          </li>
+          <li>
+            <span class="label">Data source</span>
+            <span class="value">Ticketmaster API</span>
+          </li>
+          <li>
+            <span class="label">AWS Region</span>
+            <span class="value">eu-north-1 (Stockholm)</span>
+          </li>
+          <li>
+            <span class="label">Availability Zones</span>
+            <span class="value">2 (multi-AZ)</span>
+          </li>
+          <li>
+            <span class="label">Health check</span>
+            <span class="value">/health</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- AWS ARCHITECTURE -->
+  <div class="section" style="padding-top: 0;">
+    <div class="section-heading">AWS Architecture</div>
+    <span class="section-heading-accent"></span>
+    <table class="arch-table">
+      <thead>
+        <tr>
+          <th>Component</th>
+          <th>Service</th>
+          <th>Purpose</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>Load Balancer</td>
+          <td>Application Load Balancer (ALB)</td>
+          <td>Single internet-facing entry point; distributes traffic and performs health checks</td>
+        </tr>
+        <tr>
+          <td>App Servers (×2)</td>
+          <td>Amazon EC2 (t2.micro)</td>
+          <td>Runs Flask + Gunicorn across two Availability Zones for fault tolerance</td>
+        </tr>
+        <tr>
+          <td>Virtual Network</td>
+          <td>Amazon VPC</td>
+          <td>Isolates all resources; public subnets for ALB, private subnets for EC2</td>
+        </tr>
+        <tr>
+          <td>Internet Access</td>
+          <td>Internet Gateway + NAT Gateway</td>
+          <td>IGW for inbound traffic to ALB; NAT Gateway for EC2 outbound API calls</td>
+        </tr>
+        <tr>
+          <td>Static Storage</td>
+          <td>Amazon S3</td>
+          <td>Hosts the GIKI logo and any static media assets</td>
+        </tr>
+        <tr>
+          <td>Identity</td>
+          <td>IAM Role + Inline Policy</td>
+          <td>Grants EC2 least-privilege read/write access to the S3 bucket only</td>
+        </tr>
+        <tr>
+          <td>External Data</td>
+          <td>Ticketmaster Discovery API</td>
+          <td>Provides live event listings fetched every 15 minutes by the scheduler</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- TECH STACK -->
+  <div class="section" style="padding-top: 0;">
+    <div class="section-heading">Tech Stack</div>
+    <span class="section-heading-accent"></span>
+    <div class="tech-grid">
+      <div class="tech-card">
+        <h3>Backend</h3>
+        <ul>
+          <li>Python 3.11</li>
+          <li>Flask 3.0</li>
+          <li>Gunicorn 21.2</li>
+          <li>APScheduler 3.10</li>
+          <li>Requests + boto3</li>
+        </ul>
+      </div>
+      <div class="tech-card">
+        <h3>Infrastructure</h3>
+        <ul>
+          <li>Amazon EC2 (×2, multi-AZ)</li>
+          <li>Application Load Balancer</li>
+          <li>Amazon VPC + Subnets</li>
+          <li>NAT Gateway</li>
+          <li>Amazon S3</li>
+          <li>IAM Role</li>
+        </ul>
+      </div>
+      <div class="tech-card">
+        <h3>Data</h3>
+        <ul>
+          <li>Ticketmaster Discovery API</li>
+          <li>In-memory event cache</li>
+          <li>JSON REST endpoint (/api/events)</li>
+          <li>15-minute polling interval</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+{% endblock %}
