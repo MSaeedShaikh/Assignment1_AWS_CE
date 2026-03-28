@@ -53,7 +53,7 @@ def fetch_events():
             'https://app.ticketmaster.com/discovery/v2/events.json',
             params={
                 'apikey': TICKETMASTER_API_KEY,
-                'size': 20,
+                'size': 50,
                 'countryCode': 'SE',
                 'classificationName': 'music,sports,arts',
             }
