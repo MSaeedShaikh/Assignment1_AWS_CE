@@ -5,6 +5,7 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import os
 import json
 import datetime
+from botocore.exceptions import ClientError
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -22,7 +23,10 @@ def upload_image_to_s3(image_url, event_id):
     key = f"events/{event_id}.jpg"
     try:
         s3_client.head_object(Bucket=S3_BUCKET, Key=key)
-    except s3_client.exceptions.ClientError:
+    except ClientError as e:
+        if e.response['Error']['Code'] not in ('404', 'NoSuchKey'):
+            print(f"[{datetime.datetime.now()}] S3 head_object error for {event_id}: {e}")
+            return None
         try:
             img_response = requests.get(image_url, timeout=10)
             img_response.raise_for_status()

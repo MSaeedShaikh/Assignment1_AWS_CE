@@ -17,7 +17,7 @@ chown -R ec2-user:ec2-user /home/ec2-user/unievent
 # ── Write .env with API key ───────────────────────────────────────────────────
 cat > /home/ec2-user/unievent/.env << 'EOF'
 TICKETMASTER_API_KEY=REPLACE_WITH_YOUR_KEY
-S3_BUCKET=unievent-media-bucket
+S3_BUCKET=unievent-media-bucket-706257133013-eu-north-1-an
 EOF
 
 # ── Start gunicorn ────────────────────────────────────────────────────────────
