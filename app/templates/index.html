@@ -1,215 +1,229 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>UniEvent &mdash; GIKI University Events Portal</title>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+{% extends 'base.html' %}
 
-    body {
-      font-family: Arial, sans-serif;
-      background: #F5F6FA;
-      color: #222;
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
+{% block title %}Events{% endblock %}
 
-    /* ── HEADER ── */
-    header {
-      background: #003366;
-      padding: 1.25rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 1rem;
-    }
+{% block extra_style %}
+<style>
+  /* ── FILTER BAR ── */
+  .filter-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+    padding: 1.25rem 2rem 0;
+  }
+  .pills {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+  }
+  .pill {
+    display: inline-block;
+    padding: 0.35rem 1.1rem;
+    border-radius: 999px;
+    font-size: 0.875rem;
+    font-weight: bold;
+    text-decoration: none;
+    border: 2px solid #003366;
+    background: #ffffff;
+    color: #003366;
+    transition: background 0.15s, color 0.15s;
+  }
+  .pill:hover {
+    background: #003366;
+    color: #C8A951;
+  }
+  .pill.active {
+    background: #003366;
+    color: #C8A951;
+    border-color: #003366;
+  }
+  .event-count {
+    font-size: 0.85rem;
+    color: #555;
+    white-space: nowrap;
+  }
 
-    .crest {
-      flex-shrink: 0;
-    }
-    .crest img {
-      width: 64px;
-      height: 64px;
-      object-fit: contain;
-      display: block;
-    }
+  /* ── GRID ── */
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(310px, 1fr));
+    gap: 1.5rem;
+    padding: 1.25rem 2rem 2rem;
+  }
 
-    .header-centre {
-      text-align: center;
-      flex: 1;
-    }
-    .header-centre .site-title {
-      color: #C8A951;
-      font-size: 2rem;
-      font-weight: bold;
-      line-height: 1.1;
-    }
-    .header-centre .site-subtitle {
-      color: #ffffff;
-      font-size: 0.95rem;
-      margin-top: 0.25rem;
-    }
+  /* ── CARD ── */
+  .card {
+    background: #ffffff;
+    border-radius: 12px;
+    border-left: 4px solid #C8A951;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+  .card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.13);
+  }
 
-    .event-count-badge {
-      color: #C8A951;
-      border: 2px solid #C8A951;
-      border-radius: 999px;
-      padding: 0.35rem 1rem;
-      font-size: 0.9rem;
-      font-weight: bold;
-      white-space: nowrap;
-      flex-shrink: 0;
-    }
+  .card-img-wrap {
+    position: relative;
+    flex-shrink: 0;
+  }
+  .card-img-wrap img {
+    width: 100%;
+    height: 190px;
+    object-fit: cover;
+    display: block;
+    border-radius: 12px 12px 0 0;
+  }
+  .category-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: #003366;
+    color: #C8A951;
+    font-size: 0.7rem;
+    font-weight: bold;
+    padding: 0.2rem 0.6rem;
+    border-radius: 999px;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
 
-    /* ── SUBHEADER STRIP ── */
-    .subheader {
-      background: #e4e6ed;
-      padding: 0.55rem 2rem;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      font-size: 0.8rem;
-      color: #555;
-      gap: 1rem;
-    }
+  .card-body {
+    padding: 1rem 1.25rem 1.25rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    flex: 1;
+  }
 
-    /* ── MAIN CONTENT ── */
-    main {
-      flex: 1;
-      padding: 2rem;
-    }
+  .card-name {
+    font-weight: bold;
+    color: #003366;
+    font-size: 1rem;
+    line-height: 1.35;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
 
-    .grid {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-      gap: 1.5rem;
-    }
+  .card-date {
+    color: #C8A951;
+    font-size: 0.85rem;
+  }
 
-    /* ── EVENT CARD ── */
-    .card {
-      background: #ffffff;
-      border-radius: 10px;
-      border-top: 3px solid #C8A951;
-      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-      overflow: hidden;
-      display: flex;
-      flex-direction: column;
-    }
+  .card-venue {
+    color: #777;
+    font-size: 0.85rem;
+  }
 
-    .card img {
-      width: 100%;
-      height: 180px;
-      object-fit: cover;
-      display: block;
-    }
+  .card-desc {
+    color: #888;
+    font-size: 0.8rem;
+    font-style: italic;
+    line-height: 1.4;
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+  }
 
-    .card-body {
-      padding: 1rem 1.1rem 1.25rem;
-      display: flex;
-      flex-direction: column;
-      gap: 0.45rem;
-      flex: 1;
-    }
+  .card-link {
+    margin-top: auto;
+    padding-top: 0.75rem;
+    display: inline-block;
+    color: #003366;
+    font-size: 0.85rem;
+    font-weight: bold;
+    text-decoration: none;
+  }
+  .card-link:hover {
+    text-decoration: underline;
+  }
 
-    .card-name {
-      font-weight: bold;
-      color: #003366;
-      font-size: 1rem;
-      line-height: 1.3;
-    }
+  /* ── EMPTY STATE ── */
+  .empty-state {
+    text-align: center;
+    color: #003366;
+    padding: 5rem 1rem;
+  }
+  .empty-state .empty-icon {
+    font-size: 3.5rem;
+    display: block;
+    margin-bottom: 1rem;
+  }
+  .empty-state p {
+    font-size: 1.1rem;
+  }
 
-    .card-date {
-      color: #C8A951;
-      font-size: 0.875rem;
-    }
+  @media (max-width: 768px) {
+    .filter-bar { padding: 1rem 1rem 0; }
+    .grid { padding: 1rem 1rem 1.5rem; }
+  }
+</style>
+{% endblock %}
 
-    .card-venue {
-      color: #777;
-      font-size: 0.875rem;
-    }
+{% block subheader %}
+<div class="subheader">
+  <span>Powered by Ticketmaster API &nbsp;&mdash;&nbsp; Hosted on AWS eu-north-1</span>
+  <span>Auto-refreshes every 15 minutes</span>
+</div>
+{% endblock %}
 
-    .card-link {
-      margin-top: auto;
-      padding-top: 0.75rem;
-      display: inline-block;
-      color: #003366;
-      font-size: 0.875rem;
-      font-weight: bold;
-      text-decoration: none;
-    }
-    .card-link:hover {
-      text-decoration: underline;
-    }
-
-    /* ── EMPTY STATE ── */
-    .empty-state {
-      text-align: center;
-      color: #003366;
-      font-size: 1.1rem;
-      padding: 4rem 1rem;
-    }
-
-    /* ── FOOTER ── */
-    footer {
-      background: #003366;
-      color: #C8A951;
-      text-align: center;
-      padding: 1rem 2rem;
-      font-size: 0.85rem;
-    }
-  </style>
-</head>
-<body>
-
-  <header>
-    <div class="crest"><img src="{{ url_for('static', filename='giki-logo-1.png') }}" alt="GIKI Logo"></div>
-
-    <div class="header-centre">
-      <div class="site-title">UniEvent</div>
-      <div class="site-subtitle">University Events Portal</div>
+{% block content %}
+  <div class="filter-bar">
+    <div class="pills">
+      {% for cat in ['All', 'Music', 'Sports', 'Arts'] %}
+        <a href="/?category={{ cat }}"
+           class="pill {{ 'active' if active_category == cat else '' }}">{{ cat }}</a>
+      {% endfor %}
     </div>
-
-    <div class="event-count-badge">{{ events|length }} Events</div>
-  </header>
-
-  <div class="subheader">
-    <span>Powered by Ticketmaster API &nbsp;&mdash;&nbsp; Hosted on AWS</span>
-    <span>Auto-refreshes every 15 minutes</span>
+    <span class="event-count">Showing {{ events|length }} event{{ 's' if events|length != 1 else '' }}</span>
   </div>
 
-  <main>
-    {% if events %}
-      <div class="grid">
-        {% for e in events %}
-          <div class="card">
-            {% if e.image %}
+  {% if events %}
+    <div class="grid">
+      {% for e in events %}
+        <div class="card">
+          {% if e.image %}
+            <div class="card-img-wrap">
               <img src="{{ e.image }}" alt="{{ e.name }}">
-            {% endif %}
-            <div class="card-body">
-              <div class="card-name">{{ e.name }}</div>
-              <div class="card-date">&#128197; {{ e.date or 'Date TBA' }}</div>
-              <div class="card-venue">
-                {{ e.venue or '' }}{% if e.venue and e.city %}, {% endif %}{{ e.city or '' }}
-              </div>
-              {% if e.url %}
-                <a class="card-link" href="{{ e.url }}" target="_blank" rel="noopener">View Details &rarr;</a>
+              {% if e.classification %}
+                <span class="category-badge">{{ e.classification }}</span>
               {% endif %}
             </div>
+          {% elif e.classification %}
+            <div class="card-img-wrap" style="padding: 0.5rem 1.25rem 0;">
+              <span class="category-badge" style="position:static;display:inline-block;">{{ e.classification }}</span>
+            </div>
+          {% endif %}
+          <div class="card-body">
+            <div class="card-name">{{ e.name }}</div>
+            <div class="card-date">&#128197; {{ e.date or 'Date TBA' }}</div>
+            <div class="card-venue">
+              &#128205;
+              {{ e.venue or '' }}{% if e.venue and e.city %}, {% endif %}{{ e.city or '' }}
+            </div>
+            {% if e.description %}
+              <div class="card-desc">{{ e.description }}</div>
+            {% endif %}
+            {% if e.url %}
+              <a class="card-link" href="{{ e.url }}" target="_blank" rel="noopener">View Details &rarr;</a>
+            {% endif %}
           </div>
-        {% endfor %}
-      </div>
-    {% else %}
-      <div class="empty-state">
-        Events are loading &mdash; please refresh in a moment.
-      </div>
-    {% endif %}
-  </main>
-
-  <footer>
-    GIKI UniEvent &nbsp;&mdash;&nbsp; CE308/408 Cloud Computing &nbsp;&mdash;&nbsp; AWS Deployment
-  </footer>
-
-</body>
-</html>
+        </div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="empty-state">
+      <span class="empty-icon">&#128197;</span>
+      <p>No events found. Try a different category or check back soon.</p>
+    </div>
+  {% endif %}
+{% endblock %}

@@ -1,0 +1,250 @@
+{% extends 'base.html' %}
+
+{% block title %}Contact{% endblock %}
+
+{% block extra_style %}
+<style>
+  /* ── HERO ── */
+  .hero {
+    background: #003366;
+    text-align: center;
+    padding: 3rem 2rem;
+  }
+  .hero h1 {
+    color: #C8A951;
+    font-size: 2rem;
+    font-weight: bold;
+    margin-bottom: 0.5rem;
+  }
+  .hero p {
+    color: #ffffff;
+    font-size: 1rem;
+    opacity: 0.9;
+  }
+
+  /* ── LAYOUT ── */
+  .contact-wrap {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2.5rem 2rem;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    align-items: start;
+  }
+
+  /* ── INFO CARDS ── */
+  .info-card {
+    background: #fff;
+    border-top: 3px solid #C8A951;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    padding: 1.25rem 1.5rem;
+    margin-bottom: 1.25rem;
+  }
+  .info-card:last-child {
+    margin-bottom: 0;
+  }
+  .info-card h3 {
+    color: #003366;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 0.85rem;
+  }
+  .info-list {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+  .info-list li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    padding-bottom: 0.6rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .info-list li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .info-list .label { color: #666; }
+  .info-list .value { color: #003366; font-weight: bold; text-align: right; }
+
+  /* ── STATUS CARD ── */
+  .status-card {
+    background: #fff;
+    border-top: 3px solid #C8A951;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.07);
+    padding: 1.25rem 1.5rem;
+  }
+  .status-card h3 {
+    color: #003366;
+    font-size: 1rem;
+    font-weight: bold;
+    margin-bottom: 1.1rem;
+  }
+
+  .status-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    margin-bottom: 1rem;
+  }
+  .dot {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #aaa;
+    flex-shrink: 0;
+  }
+  .dot.online {
+    background: #22c55e;
+    animation: pulse 1.8s ease-in-out infinite;
+  }
+  .dot.offline {
+    background: #ef4444;
+  }
+  @keyframes pulse {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.5); }
+    50%       { box-shadow: 0 0 0 6px rgba(34, 197, 94, 0); }
+  }
+
+  #status-text {
+    font-weight: bold;
+    color: #003366;
+    font-size: 1rem;
+  }
+
+  .status-details {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 0.55rem;
+  }
+  .status-details li {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    padding-bottom: 0.55rem;
+    border-bottom: 1px solid #f0f0f0;
+  }
+  .status-details li:last-child {
+    border-bottom: none;
+    padding-bottom: 0;
+  }
+  .status-details .label { color: #666; }
+  .status-details .value { color: #003366; font-weight: bold; }
+
+  @media (max-width: 768px) {
+    .contact-wrap {
+      grid-template-columns: 1fr;
+      padding: 1.5rem 1rem;
+    }
+    .hero { padding: 2rem 1rem; }
+    .hero h1 { font-size: 1.5rem; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+  <div class="hero">
+    <h1>Contact &amp; Support</h1>
+    <p>UniEvent &mdash; CE308/408 Cloud Computing Project</p>
+  </div>
+
+  <div class="contact-wrap">
+
+    <!-- LEFT: Info cards -->
+    <div>
+      <div class="info-card">
+        <h3>Project Info</h3>
+        <ul class="info-list">
+          <li>
+            <span class="label">Course</span>
+            <span class="value">CE308/408 Cloud Computing</span>
+          </li>
+          <li>
+            <span class="label">Institution</span>
+            <span class="value">Ghulam Ishaq Khan Institute</span>
+          </li>
+          <li>
+            <span class="label">Department</span>
+            <span class="value">Computer Engineering</span>
+          </li>
+        </ul>
+      </div>
+
+      <div class="info-card">
+        <h3>Technical</h3>
+        <ul class="info-list">
+          <li>
+            <span class="label">Hosted on</span>
+            <span class="value">AWS eu-north-1</span>
+          </li>
+          <li>
+            <span class="label">App URL</span>
+            <span class="value">Available via ALB DNS</span>
+          </li>
+          <li>
+            <span class="label">Health check</span>
+            <span class="value">/health</span>
+          </li>
+          <li>
+            <span class="label">API endpoint</span>
+            <span class="value">/api/events</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+    <!-- RIGHT: Live status -->
+    <div>
+      <div class="status-card">
+        <h3>System Status</h3>
+
+        <div class="status-row">
+          <span class="dot" id="status-dot"></span>
+          <span id="status-text">Checking&hellip;</span>
+        </div>
+
+        <ul class="status-details">
+          <li>
+            <span class="label">Events loaded</span>
+            <span class="value" id="event-count">&mdash;</span>
+          </li>
+          <li>
+            <span class="label">Last checked</span>
+            <span class="value" id="last-checked">&mdash;</span>
+          </li>
+          <li>
+            <span class="label">API endpoint</span>
+            <span class="value">/api/events</span>
+          </li>
+        </ul>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      fetch('/api/events')
+        .then(function (r) { return r.json(); })
+        .then(function (data) {
+          document.getElementById('status-dot').className = 'dot online';
+          document.getElementById('status-text').textContent = 'Online';
+          document.getElementById('event-count').textContent = data.length;
+          document.getElementById('last-checked').textContent = new Date().toLocaleTimeString();
+        })
+        .catch(function () {
+          document.getElementById('status-dot').className = 'dot offline';
+          document.getElementById('status-text').textContent = 'Offline';
+          document.getElementById('last-checked').textContent = new Date().toLocaleTimeString();
+        });
+    });
+  </script>
+
+{% endblock %}
