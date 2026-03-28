@@ -11,7 +11,7 @@ load_dotenv()
 
 
 TICKETMASTER_API_KEY = os.getenv('TICKETMASTER_API_KEY')
-S3_BUCKET = os.getenv('S3_BUCKET', 'unievent-media-bucket')
+S3_BUCKET = os.getenv('S3_BUCKET', 'unievent-media-bucket-706257133013-eu-north-1-an')
 EVENTS_CACHE = []
 
 app = Flask(__name__)
