@@ -1,15 +1,15 @@
 # UniEvent -- AWS Deployment
-## CE308/408 Cloud Computing | GIKI
+## CE408 Cloud Computing | GIKI
 
 A Flask-based university events portal that fetches live data from the Ticketmaster API, deployed on AWS with multi-AZ EC2 instances, an Application Load Balancer, and S3 for static assets.
 
-![Repo](https://img.shields.io/badge/Repo-Assignment1__AWS__CE-003366) ![Region](https://img.shields.io/badge/Region-ap--south--1-C8A951) ![Flask](https://img.shields.io/badge/Backend-Flask-003366) ![AWS](https://img.shields.io/badge/Cloud-AWS-C8A951)
+![Repo](https://img.shields.io/badge/Repo-Assignment1__AWS__CE-003366) ![Region](https://img.shields.io/badge/Region-eu--north--1-C8A951) ![Flask](https://img.shields.io/badge/Backend-Flask-003366) ![AWS](https://img.shields.io/badge/Cloud-AWS-C8A951)
 
 ---
 
 ## Project Overview
 
-UniEvent is a cloud-hosted events portal built for the CE308/408 Cloud Computing assignment at GIKI. The application pulls real-time music, sports, and arts events from the Ticketmaster Discovery API and presents them in a GIKI-branded interface. It is deployed across two Availability Zones on Amazon EC2, fronted by an Application Load Balancer, demonstrating fault-tolerant, production-grade AWS architecture.
+UniEvent is a cloud-hosted events portal built for the CE408 Cloud Computing assignment at GIKI. The application pulls real-time music, sports, and arts events from the Ticketmaster Discovery API and presents them in a GIKI-branded interface. It is deployed across two Availability Zones on Amazon EC2, fronted by an Application Load Balancer, demonstrating fault-tolerant, production-grade AWS architecture.
 
 | Component | Service | Purpose |
 |---|---|---|
@@ -18,7 +18,7 @@ UniEvent is a cloud-hosted events portal built for the CE308/408 Cloud Computing
 | Virtual Network | Amazon VPC | Isolates all resources in a private network |
 | Subnets | Public + Private Subnets | Public for ALB, private for EC2 instances |
 | Internet Gateway | IGW | Allows inbound traffic from the internet |
-| Static Assets | Amazon S3 | Stores the GIKI logo and any media assets |
+| Static Assets | Amazon S3 | Caches Ticketmaster event images |
 | IAM | IAM Role + Inline Policy | Grants EC2 least-privilege access to S3 |
 | External Data | Ticketmaster Discovery API | Provides live event listings |
 
@@ -56,6 +56,8 @@ Internet
 
 All EC2 instances sit in private subnets with no direct internet exposure. Only the ALB in the public subnets accepts inbound HTTP traffic on port 80, forwarding it to EC2 instances on port 5000. The instances reach S3 via an IAM instance role, and the Ticketmaster API is called outbound through a NAT Gateway (or public subnet routing as configured).
 
+> Full architecture details: [docs/architecture.md](docs/architecture.md)
+
 ---
 
 ## Repository Structure
@@ -63,17 +65,24 @@ All EC2 instances sit in private subnets with no direct internet exposure. Only 
 ```
 Assignment1_AWS_CE/
 ├── app/
-│   ├── app.py                  # Flask application (routes, APScheduler, Ticketmaster fetch)
+│   ├── app.py                  # Flask app — routes, scheduler, S3 image cache
 │   ├── requirements.txt        # Pinned Python dependencies
 │   ├── .env                    # Local dev secrets (git-ignored)
 │   ├── static/
-│   │   └── giki-logo-1.png     # GIKI crest served by Flask
+│   │   └── giki-logo-1.png     # GIKI logo
 │   └── templates/
-│       └── index.html          # Jinja2 template (GIKI-branded events grid)
+│       ├── base.html           # Shared base template (header, nav, footer)
+│       ├── index.html          # Events grid with category filter
+│       ├── about.html          # About page (architecture + tech stack)
+│       └── contact.html        # Contact page with live status widget
 ├── infra/
 │   └── userdata.sh             # EC2 User Data bootstrap script
 ├── docs/
+│   ├── architecture.md         # VPC design, traffic flow, fault tolerance
+│   ├── iam.md                  # IAM role and policy design
+│   ├── api-justification.md    # Ticketmaster API selection rationale
 │   └── screenshots/            # Deployment screenshots (referenced below)
+├── server.sh                   # Start / stop / restart / status helper
 ├── giki-logo-1.png             # Source logo
 ├── .gitignore
 └── README.md
@@ -118,6 +127,8 @@ Create a dedicated IAM role so EC2 instances can access S3 without embedding cre
 
 ![IAM Role Created](docs/screenshots/01-iam-role-created.png)
 ![IAM Inline Policy](docs/screenshots/02-iam-inline-policy.png)
+
+> Full IAM design rationale: [docs/iam.md](docs/iam.md)
 
 ---
 
@@ -182,12 +193,11 @@ Two security groups are chained so that EC2 instances only accept traffic origin
 
 ### Step 4 -- S3 Bucket
 
-An S3 bucket stores the GIKI logo and any other static media assets. EC2 instances access it using the IAM role created in Step 1, so no public bucket policy is needed.
+An S3 bucket caches Ticketmaster event images. On each 15-minute refresh, `fetch_events()` downloads any new images from the Ticketmaster CDN, uploads them to S3 under the `events/` prefix, and deletes images for events no longer in the feed. EC2 instances access the bucket via the IAM role from Step 1 — no public bucket policy is needed.
 
 1. Open **S3 → Create bucket**.
 2. Name it `unievent-media-bucket`, region `eu-north-1`.
 3. Leave **Block all public access** enabled.
-4. Upload `giki-logo-1.png` to the bucket.
 
 ![S3 Bucket](docs/screenshots/10-s3-bucket.png)
 
@@ -260,7 +270,7 @@ Once the ALB is provisioned, copy its DNS name from the console and open it in a
 
 - **Private subnets for EC2** -- application servers have no public IP and cannot be reached directly from the internet; all inbound traffic flows through the ALB.
 - **Security group chaining** -- `UniEvent-EC2-SG` allows port 5000 only from `UniEvent-ALB-SG`, so even internal VPC traffic is restricted to the load balancer.
-- **IAM instance role (least privilege)** -- EC2 instances authenticate to S3 via an attached role with only `GetObject`, `PutObject`, and `ListBucket` on the specific bucket, with no long-lived access keys stored on disk.
+- **IAM instance role (least privilege)** -- EC2 instances authenticate to S3 via an attached role with only `GetObject`, `PutObject`, `DeleteObject`, and `ListBucket` on the specific bucket, with no long-lived access keys stored on disk.
 - **S3 Block Public Access enabled** -- the media bucket is not publicly accessible; objects are served through the Flask application which holds the IAM role credentials automatically.
 - **API key via environment variable** -- the Ticketmaster key is loaded from a `.env` file excluded from version control via `.gitignore`, preventing accidental exposure in the repository.
 
@@ -275,6 +285,8 @@ Ticketmaster was chosen for its broad event coverage, stable free tier, and stra
 | **Ticketmaster** | 5000 req/day | API key (header/param) | name, date, venue, city, image, URL, classification | **Selected** -- generous quota, rich fields, no approval wait |
 | Eventbrite | 2000 req/day | OAuth 2.0 | name, date, venue, description | Rejected -- OAuth adds setup complexity; fewer image assets |
 | PredictHQ | 1000 req/month | Bearer token | name, date, category, rank | Rejected -- very low monthly quota; no event images |
+
+> Full comparison and integration details: [docs/api-justification.md](docs/api-justification.md)
 
 ---
 
