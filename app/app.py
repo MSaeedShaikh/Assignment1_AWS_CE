@@ -18,6 +18,13 @@ EVENTS_CACHE = []
 app = Flask(__name__)
 s3_client = boto3.client('s3', region_name='eu-north-1')
 
+try:
+    _sts = boto3.client('sts', region_name='eu-north-1')
+    _id = _sts.get_caller_identity()
+    print(f"[STARTUP] AWS identity: Account={_id['Account']} ARN={_id['Arn']}")
+except Exception as e:
+    print(f"[STARTUP] Could not get AWS identity: {e}")
+
 
 def upload_image_to_s3(image_url, event_id):
     key = f"events/{event_id}.jpg"
