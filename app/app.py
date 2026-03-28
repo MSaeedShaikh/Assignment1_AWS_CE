@@ -10,7 +10,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-
 TICKETMASTER_API_KEY = os.getenv('TICKETMASTER_API_KEY')
 S3_BUCKET = os.getenv('S3_BUCKET', 'unievent-media-bucket-706257133013-eu-north-1-an')
 EVENTS_CACHE = []
@@ -18,63 +17,37 @@ EVENTS_CACHE = []
 app = Flask(__name__)
 s3_client = boto3.client('s3', region_name='eu-north-1')
 
-try:
-    _sts = boto3.client('sts', region_name='eu-north-1')
-    _id = _sts.get_caller_identity()
-    print(f"[STARTUP] AWS identity: Account={_id['Account']} ARN={_id['Arn']}")
-except Exception as e:
-    print(f"[STARTUP] Could not get AWS identity: {e}")
-
-try:
-    s3_client.list_objects_v2(Bucket=S3_BUCKET, MaxKeys=1)
-    print(f"[STARTUP] S3 OK — bucket accessible: {S3_BUCKET}")
-except Exception as e:
-    print(f"[STARTUP] S3 FAILED for bucket '{S3_BUCKET}': {e}")
-
-try:
-    s3_client.put_object(Bucket=S3_BUCKET, Key='_test.txt', Body=b'test')
-    print(f"[STARTUP] S3 put_object OK")
-    s3_client.delete_object(Bucket=S3_BUCKET, Key='_test.txt')
-except Exception as e:
-    print(f"[STARTUP] S3 put_object FAILED: {e}")
 
 
 def upload_image_to_s3(image_url, event_id):
     key = f"events/{event_id}.jpg"
-    ts = datetime.datetime.now()
     try:
         s3_client.head_object(Bucket=S3_BUCKET, Key=key)
-        print(f"[{ts}] S3 HIT: {key}")
     except ClientError as e:
         code = e.response['Error']['Code']
         if code not in ('404', 'NoSuchKey'):
-            print(f"[{ts}] S3 head_object unexpected error ({code}) for {event_id}: {e}")
+            print(f"[{datetime.datetime.now()}] S3 head_object error ({code}) for {event_id}: {e}")
             return None
-        print(f"[{ts}] S3 MISS: {key} — downloading and uploading...")
         try:
             img_response = requests.get(image_url, timeout=10)
             img_response.raise_for_status()
-            print(f"[{ts}] Downloaded {len(img_response.content)} bytes from Ticketmaster")
             s3_client.put_object(
                 Bucket=S3_BUCKET,
                 Key=key,
                 Body=img_response.content,
                 ContentType='image/jpeg',
             )
-            print(f"[{ts}] S3 PUT OK: {key}")
         except Exception as e:
-            print(f"[{ts}] S3 upload FAILED for {event_id}: {e}")
+            print(f"[{datetime.datetime.now()}] S3 upload failed for {event_id}: {e}")
             return None
     try:
-        url = s3_client.generate_presigned_url(
+        return s3_client.generate_presigned_url(
             'get_object',
             Params={'Bucket': S3_BUCKET, 'Key': key},
             ExpiresIn=604800,
         )
-        print(f"[{ts}] Presigned URL generated for {key}")
-        return url
     except Exception as e:
-        print(f"[{ts}] Presign FAILED for {event_id}: {e}")
+        print(f"[{datetime.datetime.now()}] S3 presign failed for {event_id}: {e}")
         return None
 
 
