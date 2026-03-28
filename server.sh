@@ -15,12 +15,13 @@ start() {
     fi
     echo "Starting UniEvent..."
     cd "$APP_DIR" || exit 1
-    gunicorn --bind "$BIND" \
+    PYTHONUNBUFFERED=1 gunicorn --bind "$BIND" \
              --workers "$WORKERS" \
              --pid "$PIDFILE" \
              --daemon \
              --log-file "$LOGFILE" \
              --access-logfile "$LOGFILE" \
+             --capture-output \
              app:app
     sleep 1
     if [ -f "$PIDFILE" ] && kill -0 "$(cat "$PIDFILE")" 2>/dev/null; then
